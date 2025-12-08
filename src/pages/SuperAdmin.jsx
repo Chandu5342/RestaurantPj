@@ -1,282 +1,299 @@
+// src/pages/SuperAdmin.jsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   Building2,
   CreditCard,
   BarChart3,
-  Users,
   Settings,
   Bell,
-  Search,
+  Users,
   TrendingUp,
   DollarSign,
-  Store,
-  Activity,
-  Menu,
-  X,
-  ChevronRight,
-  Globe,
-  Shield,
+  Ticket,
+  Home,
+  Menu as MenuIcon
 } from "lucide-react";
-import { Link } from "react-router-dom";
 
-const sidebarItems = [
-  { icon: LayoutDashboard, label: "Dashboard", active: true },
-  { icon: Building2, label: "Restaurants", badge: 156 },
-  { icon: CreditCard, label: "Subscriptions" },
-  { icon: DollarSign, label: "Payments" },
-  { icon: BarChart3, label: "Analytics" },
-  { icon: Users, label: "Support Tickets", badge: 8 },
-  { icon: Activity, label: "Activity Logs" },
-  { icon: Settings, label: "Platform Settings" },
-];
+// Import SuperAdmin components
+import {
+  Sidebar,
+  Header,
+  DashboardContent,
+  RestaurantsContent,
+  SubscriptionsContent,
+  BillingContent,
+  AnalyticsContent,
+  SupportContent,
+  SettingsContent,
+  RestaurantModal,
+  PlanModal,
+  DeleteModal
+} from "@/components/superadmin";
 
-const platformStats = [
-  { label: "Total Restaurants", value: "5,248", change: "+156", icon: Store, color: "bg-primary" },
-  { label: "Monthly Revenue", value: "₹24.5L", change: "+18%", icon: DollarSign, color: "bg-green-500" },
-  { label: "Active Users", value: "128K", change: "+12%", icon: Users, color: "bg-secondary" },
-  { label: "Uptime", value: "99.9%", change: "Healthy", icon: Activity, color: "bg-gold" },
-];
-
-const topRestaurants = [
-  { name: "Spice Garden", location: "Mumbai", orders: 1240, revenue: "₹3.2L", growth: "+24%" },
-  { name: "Tandoor Tales", location: "Delhi", orders: 980, revenue: "₹2.8L", growth: "+18%" },
-  { name: "Curry House", location: "Bangalore", orders: 856, revenue: "₹2.4L", growth: "+15%" },
-  { name: "Biryani Palace", location: "Hyderabad", orders: 720, revenue: "₹2.1L", growth: "+22%" },
-];
-
-const SuperAdmin = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="p-6 border-b border-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-amber-950" />
-              </div>
-              <div>
-                <h1 className="font-display font-bold">MenuQR</h1>
-                <p className="text-xs text-muted-foreground">Super Admin</p>
-              </div>
-            </div>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        <nav className="p-4 space-y-1">
-          {sidebarItems.map((item) => (
-            <button
-              key={item.label}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                item.active
-                  ? "bg-gradient-to-r from-gold to-amber-600 text-amber-950"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="flex-1 text-left">{item.label}</span>
-              {item.badge && (
-                <Badge variant={item.active ? "secondary" : "default"} className="text-xs">
-                  {item.badge}
-                </Badge>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-4 left-4 right-4">
-          <Link to="/">
-            <Button variant="outline" className="w-full">
-              Back to Landing
-            </Button>
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-border">
-          <div className="flex items-center justify-between px-4 lg:px-8 h-16">
-            <div className="flex items-center gap-4">
-              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2">
-                <Menu className="w-5 h-5" />
-              </button>
-              <div className="relative hidden sm:block">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search restaurants, users..."
-                  className="input-field pl-10 w-64"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Badge variant="gold" className="hidden sm:flex items-center gap-1">
-                <Globe className="w-3 h-3" />
-                Global View
-              </Badge>
-              <button className="relative p-2 hover:bg-muted rounded-lg transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
-              </button>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gold to-amber-600 flex items-center justify-center">
-                <span className="text-sm font-semibold text-amber-950">SA</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="p-4 lg:p-8">
-          {/* Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="font-display text-2xl lg:text-3xl font-bold">Platform Overview</h1>
-              <p className="text-muted-foreground">Manage all restaurants and platform settings</p>
-            </div>
-            <div className="flex gap-3">
-              <Button variant="outline">Export Report</Button>
-              <Button variant="gold">Add Restaurant</Button>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {platformStats.map((stat) => (
-              <div key={stat.label} className="card-elevated p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-2xl ${stat.color} flex items-center justify-center`}>
-                    <stat.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <Badge variant="success" className="flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3" />
-                    {stat.change}
-                  </Badge>
-                </div>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Top Restaurants */}
-          <div className="card-elevated mb-8">
-            <div className="p-6 border-b border-border flex items-center justify-between">
-              <h2 className="font-display text-xl font-bold">Top Performing Restaurants</h2>
-              <Button variant="ghost" size="sm">
-                View All
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="text-left px-6 py-3 text-sm font-semibold text-muted-foreground">
-                      Restaurant
-                    </th>
-                    <th className="text-left px-6 py-3 text-sm font-semibold text-muted-foreground">
-                      Location
-                    </th>
-                    <th className="text-left px-6 py-3 text-sm font-semibold text-muted-foreground">
-                      Orders
-                    </th>
-                    <th className="text-left px-6 py-3 text-sm font-semibold text-muted-foreground">
-                      Revenue
-                    </th>
-                    <th className="text-left px-6 py-3 text-sm font-semibold text-muted-foreground">
-                      Growth
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {topRestaurants.map((restaurant) => (
-                    <tr key={restaurant.name} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <Store className="w-5 h-5 text-primary" />
-                          </div>
-                          <span className="font-semibold">{restaurant.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-muted-foreground">{restaurant.location}</td>
-                      <td className="px-6 py-4">{restaurant.orders.toLocaleString()}</td>
-                      <td className="px-6 py-4 font-semibold">{restaurant.revenue}</td>
-                      <td className="px-6 py-4">
-                        <Badge variant="success" className="flex items-center gap-1 w-fit">
-                          <TrendingUp className="w-3 h-3" />
-                          {restaurant.growth}
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="card-elevated p-6 group cursor-pointer">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Building2 className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="font-display text-lg font-bold mb-2">Restaurant Offers</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Monitor and approve festival offers from all restaurants
-              </p>
-              <Badge variant="warning">12 Pending</Badge>
-            </div>
-
-            <div className="card-elevated p-6 group cursor-pointer">
-              <div className="w-14 h-14 rounded-2xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <CreditCard className="w-7 h-7 text-secondary" />
-              </div>
-              <h3 className="font-display text-lg font-bold mb-2">Subscription Management</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Manage plans, billing cycles, and payment methods
-              </p>
-              <Badge variant="success">All Active</Badge>
-            </div>
-
-            <div className="card-elevated p-6 group cursor-pointer">
-              <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <BarChart3 className="w-7 h-7 text-gold" />
-              </div>
-              <h3 className="font-display text-lg font-bold mb-2">Platform Analytics</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Deep dive into platform-wide metrics and insights
-              </p>
-              <Badge variant="gold">View Reports</Badge>
-            </div>
-          </div>
-        </main>
-      </div>
-
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-    </div>
-  );
+// Define constants for tabs
+const TABS = {
+  DASHBOARD: "dashboard",
+  RESTAURANTS: "restaurants",
+  SUBSCRIPTIONS: "subscriptions",
+  BILLING: "billing",
+  ANALYTICS: "analytics",
+  SUPPORT: "support",
+  SETTINGS: "settings"
 };
 
-export default SuperAdmin;
+// Mock data
+const mockRestaurants = [
+  { id: 1, name: "The Urban Kitchen", owner: "John Smith", email: "john@urban.com", phone: "+91 98765 43210", address: "123 MG Road, Mumbai", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400", plan: "Pro", status: "active", orders: 1250, revenue: "₹3,45,000" },
+  { id: 2, name: "Pizza Paradise", owner: "Maria Garcia", email: "maria@pizza.com", phone: "+91 98765 43211", address: "456 Park Street, Delhi", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400", plan: "Business", status: "active", orders: 2100, revenue: "₹5,20,000" },
+  { id: 3, name: "Spice Route", owner: "Raj Patel", email: "raj@spice.com", phone: "+91 98765 43212", address: "789 Brigade Road, Bangalore", image: "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400", plan: "Starter", status: "trial", orders: 150, revenue: "₹25,000" },
+  { id: 4, name: "Sushi Master", owner: "Yuki Tanaka", email: "yuki@sushi.com", phone: "+91 98765 43213", address: "321 Linking Road, Mumbai", image: "https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=400", plan: "Pro", status: "suspended", orders: 0, revenue: "₹0" },
+  { id: 5, name: "Burger Barn", owner: "Tom Wilson", email: "tom@burger.com", phone: "+91 98765 43214", address: "654 FC Road, Pune", image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400", plan: "Business", status: "active", orders: 1800, revenue: "₹4,50,000" },
+];
+
+const initialPlans = [
+  { id: 1, name: "Starter", price: "₹999", restaurants: 12, features: ["Basic Menu", "10 Tables", "Email Support"] },
+  { id: 2, name: "Pro", price: "₹2,499", restaurants: 45, features: ["Unlimited Menu", "50 Tables", "Priority Support", "Analytics"] },
+  { id: 3, name: "Business", price: "₹4,999", restaurants: 28, features: ["Everything in Pro", "Multi-location", "API Access", "Dedicated Manager"] },
+];
+
+const supportTickets = [
+  { id: "TK001", restaurant: "Pizza Paradise", issue: "Payment gateway not working", status: "open", time: "2 hours ago" },
+  { id: "TK002", restaurant: "Spice Route", issue: "Need help with menu setup", status: "in-progress", time: "5 hours ago" },
+  { id: "TK003", restaurant: "The Urban Kitchen", issue: "QR codes not generating", status: "resolved", time: "1 day ago" },
+];
+
+export default function SuperAdminPortal() {
+  const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
+  const [restaurants, setRestaurants] = useState(mockRestaurants);
+  const [plans, setPlans] = useState(initialPlans);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Restaurant Modal State
+  const [restaurantModalOpen, setRestaurantModalOpen] = useState(false);
+  const [editingRestaurant, setEditingRestaurant] = useState(null);
+  const [restaurantForm, setRestaurantForm] = useState({
+    name: "",
+    owner: "",
+    email: "",
+    phone: "",
+    address: "",
+    image: "",
+    plan: "Starter"
+  });
+
+  // Plan Modal State
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [planForm, setPlanForm] = useState({
+    name: "",
+    price: "",
+    features: ""
+  });
+
+  // Delete Confirmation Modal
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const toggleRestaurantStatus = (id) => {
+    setRestaurants(prev => prev.map(r => {
+      if (r.id === id) {
+        return { ...r, status: r.status === "active" ? "suspended" : "active" };
+      }
+      return r;
+    }));
+  };
+
+  // Restaurant CRUD
+  const openRestaurantModal = (restaurant) => {
+    if (restaurant) {
+      setEditingRestaurant(restaurant);
+      setRestaurantForm({
+        name: restaurant.name,
+        owner: restaurant.owner,
+        email: restaurant.email,
+        phone: restaurant.phone,
+        address: restaurant.address,
+        image: restaurant.image,
+        plan: restaurant.plan
+      });
+    } else {
+      setEditingRestaurant(null);
+      setRestaurantForm({ name: "", owner: "", email: "", phone: "", address: "", image: "", plan: "Starter" });
+    }
+    setRestaurantModalOpen(true);
+  };
+
+  const saveRestaurant = () => {
+    if (!restaurantForm.name || !restaurantForm.owner) {
+      alert("Please fill in required fields: Name and Owner");
+      return;
+    }
+
+    if (editingRestaurant) {
+      setRestaurants(prev => prev.map(r =>
+        r.id === editingRestaurant.id
+          ? { ...r, ...restaurantForm }
+          : r
+      ));
+      alert("Restaurant updated successfully!");
+    } else {
+      const newRestaurant = {
+        id: Math.max(...restaurants.map(r => r.id)) + 1,
+        ...restaurantForm,
+        status: "trial",
+        orders: 0,
+        revenue: "₹0"
+      };
+      setRestaurants(prev => [...prev, newRestaurant]);
+      alert("Restaurant added successfully!");
+    }
+    setRestaurantModalOpen(false);
+  };
+
+  const deleteRestaurant = (id) => {
+    setDeleteTarget({ type: "restaurant", id });
+    setDeleteModalOpen(true);
+  };
+
+  // Plan CRUD
+  const openPlanModal = (plan) => {
+    setEditingPlan(plan);
+    setPlanForm({
+      name: plan.name,
+      price: plan.price,
+      features: plan.features.join(", ")
+    });
+    setPlanModalOpen(true);
+  };
+
+  const savePlan = () => {
+    if (!planForm.name || !planForm.price || !editingPlan) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    setPlans(prev => prev.map(p =>
+      p.id === editingPlan.id
+        ? { ...p, name: planForm.name, price: planForm.price, features: planForm.features.split(",").map(f => f.trim()) }
+        : p
+    ));
+    setPlanModalOpen(false);
+    alert("Plan updated successfully!");
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.type === "restaurant") {
+      setRestaurants(prev => prev.filter(r => r.id !== deleteTarget.id));
+      alert("Restaurant deleted successfully!");
+    }
+    setDeleteModalOpen(false);
+    setDeleteTarget(null);
+  };
+
+  const navItems = [
+    { id: TABS.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
+    { id: TABS.RESTAURANTS, label: "Restaurants", icon: Building2, badge: restaurants.length },
+    { id: TABS.SUBSCRIPTIONS, label: "Subscriptions", icon: CreditCard },
+    { id: TABS.BILLING, label: "Billing", icon: DollarSign },
+    { id: TABS.ANALYTICS, label: "Analytics", icon: BarChart3 },
+    { id: TABS.SUPPORT, label: "Support", icon: Ticket, badge: supportTickets.filter(t => t.status === "open").length },
+    { id: TABS.SETTINGS, label: "Settings", icon: Settings },
+  ];
+
+  const stats = [
+    { label: "Total Restaurants", value: "2,547", change: "+15%", icon: Building2 },
+    { label: "Active Users", value: "45.2K", change: "+22%", icon: Users },
+    { label: "Monthly Revenue", value: "₹45.6L", change: "+18%", icon: DollarSign },
+    { label: "Total Orders", value: "1.2M", change: "+25%", icon: TrendingUp },
+  ];
+
+  const filteredRestaurants = restaurants.filter(r =>
+    r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.owner.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        navItems={navItems}
+      />
+
+      <main className="flex-1 lg:ml-64">
+        <Header activeTab={activeTab} setSidebarOpen={setSidebarOpen} />
+
+        <div className="p-6">
+          {activeTab === TABS.DASHBOARD && (
+            <DashboardContent stats={stats} restaurants={restaurants} />
+          )}
+
+          {activeTab === TABS.RESTAURANTS && (
+            <RestaurantsContent
+              restaurants={filteredRestaurants}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              openRestaurantModal={openRestaurantModal}
+              toggleRestaurantStatus={toggleRestaurantStatus}
+              deleteRestaurant={deleteRestaurant}
+            />
+          )}
+
+          {activeTab === TABS.SUBSCRIPTIONS && (
+            <SubscriptionsContent plans={plans} openPlanModal={openPlanModal} />
+          )}
+
+          {activeTab === TABS.BILLING && (
+            <BillingContent />
+          )}
+
+          {activeTab === TABS.ANALYTICS && (
+            <AnalyticsContent />
+          )}
+
+          {activeTab === TABS.SUPPORT && (
+            <SupportContent supportTickets={supportTickets} />
+          )}
+
+          {activeTab === TABS.SETTINGS && (
+            <SettingsContent />
+          )}
+        </div>
+      </main>
+
+      <RestaurantModal
+        open={restaurantModalOpen}
+        onClose={() => setRestaurantModalOpen(false)}
+        editingRestaurant={editingRestaurant}
+        restaurantForm={restaurantForm}
+        setRestaurantForm={setRestaurantForm}
+        saveRestaurant={saveRestaurant}
+        plans={plans}
+      />
+
+      <PlanModal
+        open={planModalOpen}
+        onClose={() => setPlanModalOpen(false)}
+        editingPlan={editingPlan}
+        planForm={planForm}
+        setPlanForm={setPlanForm}
+        savePlan={savePlan}
+      />
+
+      <DeleteModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        deleteTarget={deleteTarget}
+        confirmDelete={confirmDelete}
+      />
+    </div>
+  );
+}

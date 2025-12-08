@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { 
-  QrCode, 
-  Camera, 
-  CameraOff, 
-  ArrowLeft, 
+import {
+  QrCode,
+  Camera,
+  CameraOff,
+  ArrowLeft,
   RotateCcw,
   CheckCircle2,
   AlertCircle,
@@ -43,7 +43,7 @@ const Scanner = () => {
         { facingMode },
         config,
         (decodedText) => handleScanSuccess(decodedText),
-        () => {}
+        () => { }
       );
 
       setIsScanning(true);
@@ -116,8 +116,8 @@ const Scanner = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between px-4 h-14 sm:h-16">
-          <button 
-            onClick={() => navigate("/")} 
+          <button
+            onClick={() => navigate("/")}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -132,7 +132,7 @@ const Scanner = () => {
       <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8">
         <div className="w-full max-w-md mx-auto">
           <div ref={containerRef} className="relative bg-card rounded-3xl overflow-hidden shadow-elevated border border-border">
-            
+
             <div className="aspect-square relative">
               {!isScanning && !scannedResult && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
