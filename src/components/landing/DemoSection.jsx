@@ -33,7 +33,7 @@ export const DemoSection = () => {
             <p className="text-muted-foreground mb-6">
               QR scan, digital menu, filters, offers, cart, and order tracking experience.
             </p>
-            <Link to="/menu">
+            <Link to="/firstpage">
               <Button variant="default" className="w-full">
                 Try Customer Menu
                 <ArrowRight className="w-4 h-4" />

@@ -10,6 +10,9 @@ import Admin from "./pages/Admin";
 import SuperAdmin from "./pages/SuperAdmin";
 import Scanner from "./pages/Scanner";
 import NotFound from "./pages/NotFound";
+import FirstPage from "./components/menu/FirstPage";
+import CheckoutPage from "./components/menu/CheckoutPage";
+import Order from "./components/menu/Order";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +26,10 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/menu" element={<Menu />} />
+               <Route path="/firstpage" element={<FirstPage />} />
             <Route path="/admin" element={<Admin />} />
+             <Route path="/checkout" element={<CheckoutPage />} />
+                 <Route path="/order" element={<Order />} />
             <Route path="/super-admin" element={<SuperAdmin />} />
             <Route path="/scan" element={<Scanner />} />
             <Route path="*" element={<NotFound />} />
