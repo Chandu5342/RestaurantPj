@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, Minus, Plus, Trash2, Tag } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const CartSheet = ({ 
   isOpen, 
@@ -160,10 +161,11 @@ export const CartSheet = ({
                 <span>₹{total}</span>
               </div>
             </div>
-
+             <Link to="/checkout">
             <Button size="lg" className="w-full">
               Proceed to Checkout
             </Button>
+            </Link>
           </div>
         )}
       </div>
