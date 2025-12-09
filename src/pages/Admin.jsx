@@ -1,3 +1,4 @@
+// Admin.jsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,11 +12,6 @@ import {
   Settings,
   Bell,
   Search,
-  Plus,
-  TrendingUp,
-  Clock,
-  DollarSign,
-  ChevronRight,
   Menu,
   X,
   QrCode,
@@ -24,6 +20,8 @@ import { Link } from "react-router-dom";
 import { menuItems as initialMenuItems } from "@/data/menuData";
 import { MenuManagement } from "@/components/admin/MenuManagement";
 import { TableManagement } from "@/components/admin/TableManagement";
+import { Dashboard } from "@/components/admin/Dashboard";
+import { LiveOrders } from "@/components/admin/LiveOrders";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", id: "dashboard" },
@@ -36,18 +34,64 @@ const sidebarItems = [
   { icon: Settings, label: "Settings", id: "settings" },
 ];
 
-const stats = [
-  { label: "Today's Revenue", value: "₹24,850", change: "+12%", icon: DollarSign, color: "bg-success" },
-  { label: "Active Orders", value: "12", change: "+3", icon: ShoppingCart, color: "bg-primary" },
-  { label: "Items Served", value: "156", change: "+28", icon: UtensilsCrossed, color: "bg-secondary" },
-  { label: "Avg Order Time", value: "18 min", change: "-2 min", icon: Clock, color: "bg-gold" },
-];
-
-const recentOrders = [
-  { id: "#1024", table: "Table 5", items: 4, total: "₹1,240", status: "Preparing", time: "2 min ago" },
-  { id: "#1023", table: "Table 12", items: 2, total: "₹580", status: "Ready", time: "5 min ago" },
-  { id: "#1022", table: "Table 8", items: 6, total: "₹2,100", status: "Delivered", time: "12 min ago" },
-  { id: "#1021", table: "Table 3", items: 3, total: "₹890", status: "Preparing", time: "15 min ago" },
+// Orders data from the image reference
+const initialOrders = [
+  {
+    id: "MFO01",
+    table: "Table 5",
+    items: "Margherita Pizza, Caesar Salad, Garlic Bread",
+    amount: "₹478",
+    time: "2 min ago",
+    status: "Pending"
+  },
+  {
+    id: "MFO02",
+    table: "Table 3",
+    items: "Chicken Burger x2, Pasta Alfredo, Coke",
+    amount: "₹647",
+    time: "8 min ago",
+    status: "Preparing"
+  },
+  {
+    id: "MFO03",
+    table: "Table 8",
+    items: "Grilled Salmon, Mashed Potatoes",
+    amount: "₹449",
+    time: "15 min ago",
+    status: "Ready"
+  },
+  {
+    id: "MFO04",
+    table: "Table 1",
+    items: "Veggie Wrap, Caesar Salad, Smoothie",
+    amount: "₹338",
+    time: "25 min ago",
+    status: "Completed"
+  },
+  {
+    id: "MFO05",
+    table: "Table 12",
+    items: "Pasta Alfredo, Garlic Bread, Tiramisu",
+    amount: "₹399",
+    time: "1 min ago",
+    status: "Pending"
+  },
+  {
+    id: "MFO06",
+    table: "Table 7",
+    items: "Chicken Burger, French Fries",
+    amount: "₹289",
+    time: "5 min ago",
+    status: "Preparing"
+  },
+  {
+    id: "MFO07",
+    table: "Table 9",
+    items: "Veggie Pizza, Coke",
+    amount: "₹359",
+    time: "3 min ago",
+    status: "Pending"
+  },
 ];
 
 const initialTables = [
@@ -63,6 +107,7 @@ const Admin = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [menuItemsList, setMenuItemsList] = useState(initialMenuItems);
   const [tables, setTables] = useState(initialTables);
+  const [orders, setOrders] = useState(initialOrders);
 
   // Menu CRUD operations
   const handleAddMenuItem = (item) => {
@@ -101,6 +146,32 @@ const Admin = () => {
 
   const handleDeleteTable = (id) => {
     setTables((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Order actions
+  const handleOrderAction = (orderId, action) => {
+    setOrders(prev => prev.map(order => {
+      if (order.id === orderId) {
+        let newStatus = order.status;
+
+        switch (action) {
+          case "Accept":
+            newStatus = "Preparing";
+            break;
+          case "Mark Ready":
+            newStatus = "Ready";
+            break;
+          case "Complete":
+            newStatus = "Completed";
+            break;
+          default:
+            break;
+        }
+
+        return { ...order, status: newStatus };
+      }
+      return order;
+    }));
   };
 
   const handleSidebarClick = (id) => {
@@ -190,11 +261,14 @@ const Admin = () => {
         {/* Content */}
         <main className="p-4 lg:p-8">
           {activeTab === "dashboard" && (
-            <>
-              {/* Dashboard content */}
-              {/* Stats, recent orders etc. */}
-              {/* ...copy the JSX as is from your TS version */}
-            </>
+            <Dashboard orders={orders} />
+          )}
+
+          {activeTab === "orders" && (
+            <LiveOrders
+              orders={orders}
+              onOrderAction={handleOrderAction}
+            />
           )}
 
           {activeTab === "menu" && (
@@ -215,7 +289,7 @@ const Admin = () => {
             />
           )}
 
-          {activeTab !== "dashboard" && activeTab !== "menu" && activeTab !== "tables" && (
+          {activeTab !== "dashboard" && activeTab !== "orders" && activeTab !== "menu" && activeTab !== "tables" && (
             <div className="text-center py-16">
               <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
                 {sidebarItems.find((i) => i.id === activeTab)?.icon && (
