@@ -1,6 +1,9 @@
 import { QrCode } from "lucide-react";
 
 export const Footer = () => {
+  // Get current year dynamically
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="bg-foreground text-background py-16">
       <div className="container mx-auto px-4">
@@ -27,7 +30,7 @@ export const Footer = () => {
               <li><a href="#features" className="hover:text-background transition-colors">Features</a></li>
               <li><a href="#pricing" className="hover:text-background transition-colors">Pricing</a></li>
               <li><a href="#demo" className="hover:text-background transition-colors">Demo</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">API</a></li>
+              <li><a href="#contact" className="hover:text-background transition-colors">Contact</a></li>
             </ul>
           </div>
 
@@ -35,9 +38,9 @@ export const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-3 text-background/70">
-              <li><a href="#" className="hover:text-background transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Blog</a></li>
+              <li><a href="#features" className="hover:text-background transition-colors">Features</a></li>
+              <li><a href="#pricing" className="hover:text-background transition-colors">Pricing</a></li>
+              <li><a href="#demo" className="hover:text-background transition-colors">Demo</a></li>
               <li><a href="#contact" className="hover:text-background transition-colors">Contact</a></li>
             </ul>
           </div>
@@ -57,7 +60,7 @@ export const Footer = () => {
 
         <div className="border-t border-background/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-background/60 text-sm">
-            © 2024 MenuQR. All rights reserved.
+            © {currentYear} MenuQR. All rights reserved.
           </p>
           <p className="text-background/60 text-sm">
             Made with ❤️ for restaurants everywhere

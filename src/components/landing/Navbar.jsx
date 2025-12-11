@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom"; // ADD THIS LINE
 import { Button } from "@/components/ui/button";
 import { Menu, X, QrCode } from "lucide-react";
 
@@ -47,10 +48,14 @@ export const Navbar = () => {
             </a>
           </div>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - UPDATED SECTION */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost">Login</Button>
-            <Button variant="default">Start Free Trial</Button>
+            <Link to="/admin/login">
+              <Button variant="ghost">Admin Login</Button>
+            </Link>
+            <Link to="/admin/signup">
+              <Button variant="default">Start Free Trial</Button>
+            </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -59,7 +64,7 @@ export const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - UPDATED SECTION */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-4">
@@ -89,12 +94,16 @@ export const Navbar = () => {
               </a>
 
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
-                <Button variant="ghost" className="justify-center">
-                  Login
-                </Button>
-                <Button variant="default" className="justify-center">
-                  Start Free Trial
-                </Button>
+                <Link to="/admin/login">
+                  <Button variant="ghost" className="w-full justify-center">
+                    Admin Login
+                  </Button>
+                </Link>
+                <Link to="/admin/signup">
+                  <Button variant="default" className="w-full justify-center">
+                    Start Free Trial
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

@@ -16,7 +16,7 @@ export const DemoSection = () => {
             <span className="text-gradient">Complete Platform</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            Explore all three portals - Customer Menu, Restaurant Admin, and Super Admin. 
+            Explore all three portals - Customer Menu, Restaurant Admin, and Super Admin.
             See how everything works together seamlessly.
           </p>
         </div>
@@ -50,7 +50,7 @@ export const DemoSection = () => {
             <p className="text-muted-foreground mb-6">
               Dashboard, orders, menu management, offers, and staff controls.
             </p>
-            <Link to="/admin/signup">
+            <Link to="/admin/login">
               <Button variant="secondary" className="w-full">
                 Explore Admin Portal
                 <ArrowRight className="w-4 h-4" />
@@ -59,21 +59,7 @@ export const DemoSection = () => {
           </div>
 
           {/* Super Admin */}
-          <div className="card-elevated p-8 text-center group">
-            <div className="w-20 h-20 rounded-3xl bg-gold/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
-              <Settings className="w-10 h-10 text-gold" />
-            </div>
-            <h3 className="font-display text-2xl font-bold mb-3">Super Admin</h3>
-            <p className="text-muted-foreground mb-6">
-              Multi-restaurant management, subscriptions, analytics, and platform control.
-            </p>
-            <Link to="/admin/signup">
-              <Button variant="gold" className="w-full">
-                View Super Admin
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
+
 
         </div>
       </div>
