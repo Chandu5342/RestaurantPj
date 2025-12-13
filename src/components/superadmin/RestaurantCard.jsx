@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Building2, Edit, Trash2, Power } from "lucide-react";
 
-const RestaurantCard = ({ restaurant, onEdit, onDelete, onToggleStatus }) => {
+const RestaurantCard = ({ restaurant, onEdit, onDelete, onToggleStatus, onApprove }) => {
     return (
         <div className="rounded-xl border bg-white border-gray-200 shadow-sm p-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -39,13 +39,19 @@ const RestaurantCard = ({ restaurant, onEdit, onDelete, onToggleStatus }) => {
                     <Button variant="ghost" size="icon" onClick={onDelete}>
                         <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onToggleStatus}
-                    >
-                        <Power className={`w-4 h-4 ${restaurant.status === "active" ? "text-green-500" : "text-red-500"}`} />
-                    </Button>
+                    {restaurant.status === 'pending' ? (
+                        <Button variant="default" size="sm" onClick={() => onApprove && onApprove(restaurant._id || restaurant.id)}>
+                            Approve
+                        </Button>
+                    ) : (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onToggleStatus}
+                        >
+                            <Power className={`w-4 h-4 ${restaurant.status === "active" ? "text-green-500" : "text-red-500"}`} />
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

@@ -10,6 +10,8 @@ const RestaurantsContent = ({
     openRestaurantModal,
     toggleRestaurantStatus,
     deleteRestaurant
+    ,
+    approveRestaurant
 }) => {
     return (
         <div className="space-y-6">
@@ -41,6 +43,7 @@ const RestaurantsContent = ({
                         onEdit={() => openRestaurantModal(r)}
                         onDelete={() => deleteRestaurant(r.id)}
                         onToggleStatus={() => toggleRestaurantStatus(r.id)}
+                        onApprove={() => approveRestaurant(r._id || r.id)}
                     />
                 ))}
             </div>

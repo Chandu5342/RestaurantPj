@@ -2,20 +2,9 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, MapPin, Upload, Image } from "lucide-react";
+import { register as apiRegister } from '@/api/authApi';
 
-const USERS_KEY = "rb_users";
-
-const readUsers = () => {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const writeUsers = (users) => {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-};
+// Using real backend API for registration. Local demo storage removed.
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -26,12 +15,12 @@ const Signup = () => {
     email: "",
     password: "",
     location: "",
-    imageUrl: ""
+    imageUrl: "",
+    restaurantName: ""
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState("");
-  const [autoLocation, setAutoLocation] = useState("");
+  const [uploadedImage, setUploadedImage] = useState("");  const [uploadedFile, setUploadedFile] = useState(null);  const [autoLocation, setAutoLocation] = useState("");
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -63,6 +52,8 @@ const Signup = () => {
         return;
       }
 
+      setUploadedFile(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setUploadedImage(reader.result);
@@ -71,7 +62,7 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -80,34 +71,42 @@ const Signup = () => {
       return;
     }
 
-    const users = readUsers();
-    const exists = users.some(
-      (u) => u.email.toLowerCase() === form.email.toLowerCase()
-    );
+    try {
+      const payload = new FormData();
+      payload.append('name', form.name);
+      payload.append('email', form.email.toLowerCase());
+      payload.append('password', form.password);
+      payload.append('role', role);
+      payload.append('location', form.location || '');
+      payload.append('restaurantName', form.restaurantName || '');
 
-    if (exists) {
-      setError("Email already registered. Please login.");
-      return;
+      if (uploadedFile) {
+        payload.append('avatar', uploadedFile);
+      } else if (form.imageUrl) {
+        payload.append('avatarUrl', form.imageUrl);
+      }
+
+      const data = await apiRegister(payload);
+
+      // save token for frontend sessions (may be absent for pending admin)
+      if (data.token) {
+        localStorage.setItem('rb_token', data.token);
+      }
+      if (data.user) {
+        localStorage.setItem('rb_user', JSON.stringify(data.user));
+      }
+
+      // Show success message and navigate
+      if (role === 'admin') {
+        alert('Account created. Your restaurant registration is pending approval from a Super Admin.');
+      } else {
+        alert(`Account created successfully as ${role === 'super-admin' ? 'Super Admin' : role}!`);
+      }
+      navigate('/admin/login', { replace: true });
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Registration failed, please try again');
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      name: form.name,
-      email: form.email.toLowerCase(),
-      password: form.password,
-      role: role,
-      location: form.location || "Not specified",
-      profileImage: uploadedImage || form.imageUrl || "",
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
-    writeUsers(users);
-
-    // Show success message
-    alert(`Account created successfully as ${role === "admin" ? "Admin" : "Super Admin"}!`);
-
-    navigate("/admin/login", { replace: true });
   };
 
   return (

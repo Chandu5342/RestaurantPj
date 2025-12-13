@@ -1,7 +1,8 @@
 // src/pages/SuperAdmin.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { getPendingRestaurants, approveRestaurant as apiApproveRestaurant } from '@/api/restaurantApi';
 import {
   LayoutDashboard,
   Building2,
@@ -45,6 +46,7 @@ const TABS = {
 };
 
 // Mock data
+// default empty until fetched
 const mockRestaurants = [
   { id: 1, name: "The Urban Kitchen", owner: "John Smith", email: "john@urban.com", phone: "+91 98765 43210", address: "123 MG Road, Mumbai", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400", plan: "Pro", status: "active", orders: 1250, revenue: "₹3,45,000" },
   { id: 2, name: "Pizza Paradise", owner: "Maria Garcia", email: "maria@pizza.com", phone: "+91 98765 43211", address: "456 Park Street, Delhi", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400", plan: "Business", status: "active", orders: 2100, revenue: "₹5,20,000" },
@@ -64,6 +66,8 @@ const supportTickets = [
   { id: "TK002", restaurant: "Spice Route", issue: "Need help with menu setup", status: "in-progress", time: "5 hours ago" },
   { id: "TK003", restaurant: "The Urban Kitchen", issue: "QR codes not generating", status: "resolved", time: "1 day ago" },
 ];
+
+// moved to top
 
 export default function SuperAdminPortal() {
   const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
@@ -105,6 +109,47 @@ export default function SuperAdminPortal() {
       }
       return r;
     }));
+  };
+
+  const fetchPending = async () => {
+    try {
+      const pending = await getPendingRestaurants();
+      // pending may be an array
+      const list = Array.isArray(pending) ? pending : pending?.restaurants || [];
+      const normalized = list.map(r => ({
+        id: r._id || r.id,
+        _id: r._id || r.id,
+        name: r.name,
+        owner: (r.owner && (r.owner.name || r.owner)) || '',
+        email: r.owner?.email || '',
+        phone: r.phone || '',
+        address: r.address || '',
+        image: r.logo?.url || r.avatar?.url || r.image || '',
+        plan: r.plan || 'N/A',
+        status: r.status || 'pending',
+        orders: r.orders || 0,
+        revenue: r.revenue || '₹0'
+      }));
+      setRestaurants(normalized);
+    } catch (e) {
+      console.error('Failed to fetch pending restaurants', e.message || e);
+    }
+  };
+
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
+  const approveRestaurant = async (id) => {
+    if (!confirm('Approve this restaurant?')) return;
+    try {
+      await apiApproveRestaurant(id);
+      setRestaurants(prev => prev.filter(r => (r._id || r.id) !== id));
+      alert('Restaurant approved.');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to approve restaurant.');
+    }
   };
 
   // Restaurant CRUD
@@ -244,6 +289,7 @@ export default function SuperAdminPortal() {
               openRestaurantModal={openRestaurantModal}
               toggleRestaurantStatus={toggleRestaurantStatus}
               deleteRestaurant={deleteRestaurant}
+              approveRestaurant={approveRestaurant}
             />
           )}
 

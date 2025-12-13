@@ -2,17 +2,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { login as apiLogin } from "@/api/authApi";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
-
-const USERS_KEY = "rb_users";
-
-const readUsers = () => {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,7 +16,7 @@ const Login = () => {
 
   const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -35,20 +26,20 @@ const Login = () => {
       return;
     }
 
-    const users = readUsers();
-    const user = users.find((u) => u.email === form.email.toLowerCase() && u.password === form.password);
+    try {
+      const data = await apiLogin({ email: form.email.toLowerCase(), password: form.password });
 
-    if (!user) {
-      setError("Invalid email or password.");
-      return;
-    }
+      localStorage.setItem('rb_token', data.token);
+      localStorage.setItem('rb_user', JSON.stringify(data.user));
 
-    localStorage.setItem("rb_session", JSON.stringify({ userId: user.id, role: user.role, name: user.name }));
-
-    if (user.role === "super-admin") {
-      navigate("/super-admin", { replace: true });
-    } else {
-      navigate("/admin", { replace: true });
+      if (data.user?.role === 'super-admin') {
+        navigate('/super-admin', { replace: true });
+      } else {
+        navigate('/admin', { replace: true });
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Login failed, please try again');
     }
   };
 
@@ -62,19 +53,11 @@ const Login = () => {
       return;
     }
 
-    const users = readUsers();
-    const user = users.find((u) => u.email === forgotEmail.toLowerCase());
-
-    if (!user) {
-      setError("No account found with this email address.");
-      return;
-    }
-
+    // Demo: in production, this would call backend to send reset email
     setSuccess(`Password reset instructions have been sent to ${forgotEmail}. 
                 Check your email (in this demo, check the console).`);
 
-    console.log(`Password reset link for ${forgotEmail}: 
-                http://localhost:3000/admin/reset-password?token=demo&email=${forgotEmail}`);
+    console.log(`Password reset link for ${forgotEmail}: http://localhost:3000/admin/reset-password?token=demo&email=${forgotEmail}`);
 
     setForgotEmail("");
     setTimeout(() => {
@@ -82,17 +65,7 @@ const Login = () => {
     }, 3000);
   };
 
-  const resetPassword = (email, newPassword) => {
-    const users = readUsers();
-    const userIndex = users.findIndex((u) => u.email === email.toLowerCase());
-
-    if (userIndex !== -1) {
-      users[userIndex].password = newPassword;
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-      return true;
-    }
-    return false;
-  };
+  // resetPassword is demo-only and handled by backend in production
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
