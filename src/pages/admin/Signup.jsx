@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, MapPin, Upload, Image } from "lucide-react";
+import { Eye, EyeOff, MapPin, Upload, Image, Building, User } from "lucide-react";
 
 const USERS_KEY = "rb_users";
 
@@ -21,20 +21,29 @@ const Signup = () => {
   const navigate = useNavigate();
 
   const [role, setRole] = useState("admin");
-  const [form, setForm] = useState({
+  const [adminForm, setAdminForm] = useState({
     name: "",
     email: "",
     password: "",
+    restaurantName: "",
     location: "",
     imageUrl: ""
+  });
+  const [superAdminForm, setSuperAdminForm] = useState({
+    name: "",
+    email: "",
+    password: ""
   });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [uploadedImage, setUploadedImage] = useState("");
   const [autoLocation, setAutoLocation] = useState("");
 
-  const handleChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleAdminChange = (e) =>
+    setAdminForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSuperAdminChange = (e) =>
+    setSuperAdminForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
@@ -43,7 +52,7 @@ const Signup = () => {
           const { latitude, longitude } = position.coords;
           const locationStr = `Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`;
           setAutoLocation(locationStr);
-          setForm(prev => ({ ...prev, location: locationStr }));
+          setAdminForm(prev => ({ ...prev, location: locationStr }));
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -58,7 +67,7 @@ const Signup = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      if (file.size > 5 * 1024 * 1024) {
         setError("Image size should be less than 5MB");
         return;
       }
@@ -71,18 +80,31 @@ const Signup = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const validateAdminForm = () => {
+    if (!adminForm.name || !adminForm.email || adminForm.password.length < 6 || !adminForm.restaurantName) {
+      setError("Please fill all required fields. Password must be at least 6 characters.");
+      return false;
+    }
+    return true;
+  };
+
+  const validateSuperAdminForm = () => {
+    if (!superAdminForm.name || !superAdminForm.email || superAdminForm.password.length < 6) {
+      setError("Please fill all required fields. Password must be at least 6 characters.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleAdminSubmit = (e) => {
     e.preventDefault();
     setError("");
 
-    if (!form.name || !form.email || form.password.length < 6) {
-      setError("Please enter valid details. Password must be at least 6 characters.");
-      return;
-    }
+    if (!validateAdminForm()) return;
 
     const users = readUsers();
     const exists = users.some(
-      (u) => u.email.toLowerCase() === form.email.toLowerCase()
+      (u) => u.email.toLowerCase() === adminForm.email.toLowerCase()
     );
 
     if (exists) {
@@ -92,23 +114,56 @@ const Signup = () => {
 
     const newUser = {
       id: Date.now().toString(),
-      name: form.name,
-      email: form.email.toLowerCase(),
-      password: form.password,
-      role: role,
-      location: form.location || "Not specified",
-      profileImage: uploadedImage || form.imageUrl || "",
+      name: adminForm.name,
+      email: adminForm.email.toLowerCase(),
+      password: adminForm.password,
+      role: "admin",
+      restaurantName: adminForm.restaurantName,
+      location: adminForm.location || "Not specified",
+      profileImage: uploadedImage || adminForm.imageUrl || "",
       createdAt: new Date().toISOString()
     };
 
     users.push(newUser);
     writeUsers(users);
 
-    // Show success message
-    alert(`Account created successfully as ${role === "admin" ? "Admin" : "Super Admin"}!`);
-
+    alert(`Admin account created successfully for ${adminForm.restaurantName}!`);
     navigate("/admin/login", { replace: true });
   };
+
+  const handleSuperAdminSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!validateSuperAdminForm()) return;
+
+    const users = readUsers();
+    const exists = users.some(
+      (u) => u.email.toLowerCase() === superAdminForm.email.toLowerCase()
+    );
+
+    if (exists) {
+      setError("Email already registered. Please login.");
+      return;
+    }
+
+    const newUser = {
+      id: Date.now().toString(),
+      name: superAdminForm.name,
+      email: superAdminForm.email.toLowerCase(),
+      password: superAdminForm.password,
+      role: "super-admin",
+      createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    writeUsers(users);
+
+    alert(`Super Admin account created successfully!`);
+    navigate("/admin/login", { replace: true });
+  };
+
+  const handleSubmit = role === "admin" ? handleAdminSubmit : handleSuperAdminSubmit;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -134,8 +189,11 @@ const Signup = () => {
                 : "bg-background text-foreground border-border hover:border-primary/50"
                 }`}
             >
-              Admin
-              <p className="text-xs mt-1 opacity-80">Single Restaurant</p>
+              <div className="flex flex-col items-center">
+                <Building size={20} className="mb-1" />
+                <span>Admin</span>
+                <p className="text-xs mt-1 opacity-80">Single Restaurant</p>
+              </div>
             </button>
 
             <button
@@ -146,25 +204,38 @@ const Signup = () => {
                 : "bg-background text-foreground border-border hover:border-primary/50"
                 }`}
             >
-              Super Admin
-              <p className="text-xs mt-1 opacity-80">Multiple Restaurants</p>
+              <div className="flex flex-col items-center">
+                <User size={20} className="mb-1" />
+                <span>Super Admin</span>
+                <p className="text-xs mt-1 opacity-80">Multiple Restaurants</p>
+              </div>
             </button>
           </div>
         </div>
 
         <h2 className="text-xl font-bold mb-6 pb-2 border-b">
-          {role === "admin" ? "📋 Admin Registration" : "👑 Super Admin Registration"}
+          {role === "admin" ? (
+            <span className="flex items-center gap-2">
+              <Building size={20} />
+              Admin Registration
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <User size={20} />
+              Super Admin Registration
+            </span>
+          )}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
+          {/* Common Fields for Both Roles */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Full Name *</label>
               <input
                 name="name"
-                value={form.name}
-                onChange={handleChange}
+                value={role === "admin" ? adminForm.name : superAdminForm.name}
+                onChange={role === "admin" ? handleAdminChange : handleSuperAdminChange}
                 className="input-field w-full"
                 placeholder="John Doe"
                 required
@@ -176,8 +247,8 @@ const Signup = () => {
               <input
                 name="email"
                 type="email"
-                value={form.email}
-                onChange={handleChange}
+                value={role === "admin" ? adminForm.email : superAdminForm.email}
+                onChange={role === "admin" ? handleAdminChange : handleSuperAdminChange}
                 className="input-field w-full"
                 placeholder="you@restaurant.com"
                 required
@@ -192,8 +263,8 @@ const Signup = () => {
               <input
                 name="password"
                 type={showPassword ? "text" : "password"}
-                value={form.password}
-                onChange={handleChange}
+                value={role === "admin" ? adminForm.password : superAdminForm.password}
+                onChange={role === "admin" ? handleAdminChange : handleSuperAdminChange}
                 className="input-field w-full pr-10"
                 placeholder="Minimum 6 characters"
                 required
@@ -208,101 +279,151 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Location Section */}
-          <div className="border-t pt-6">
-            <label className="text-sm font-medium mb-3 block flex items-center gap-2">
-              <MapPin size={16} />
-              Restaurant Location
-            </label>
-            <div className="space-y-3">
-              <input
-                type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                className="input-field w-full"
-                placeholder="Enter restaurant address or location"
-              />
-              <button
-                type="button"
-                onClick={getCurrentLocation}
-                className="flex items-center gap-2 px-4 py-2 bg-secondary/10 hover:bg-secondary/20 rounded transition-colors text-sm w-full justify-center"
-              >
-                <MapPin size={16} />
-                Detect Current Location Automatically
-              </button>
-              {autoLocation && (
-                <div className="text-xs bg-muted/30 p-3 rounded flex items-start gap-2">
-                  <MapPin size={12} className="mt-0.5" />
+          {/* ADMIN ONLY FIELDS */}
+          {role === "admin" && (
+            <>
+              {/* Restaurant Name */}
+              <div className="border-t pt-6">
+                <label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                  <Building size={16} />
+                  Restaurant Information
+                </label>
+                <div className="space-y-3">
                   <div>
-                    <p className="font-medium">Detected Location:</p>
-                    <p className="text-muted-foreground">{autoLocation}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Image Upload Section */}
-          <div className="border-t pt-6">
-            <label className="text-sm font-medium mb-3 block flex items-center gap-2">
-              <Image size={16} />
-              Restaurant Logo / Profile Image
-            </label>
-            <div className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Option 1: Enter URL</p>
-                  <input
-                    type="text"
-                    name="imageUrl"
-                    value={form.imageUrl}
-                    onChange={handleChange}
-                    className="input-field w-full"
-                    placeholder="https://example.com/logo.png"
-                  />
-                </div>
-
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Option 2: Upload File</p>
-                  <label className="flex items-center gap-2 px-4 py-3 bg-primary/10 hover:bg-primary/20 rounded transition-colors cursor-pointer justify-center">
-                    <Upload size={16} />
-                    Choose Image File
+                    <label className="text-sm font-medium mb-2 block">Restaurant Name *</label>
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
+                      name="restaurantName"
+                      value={adminForm.restaurantName}
+                      onChange={handleAdminChange}
+                      className="input-field w-full"
+                      placeholder="Enter your restaurant name"
+                      required
                     />
-                  </label>
+                  </div>
                 </div>
               </div>
 
-              {/* Image Preview */}
-              {(form.imageUrl || uploadedImage) && (
-                <div className="mt-3">
-                  <p className="text-xs text-muted-foreground mb-2">Preview:</p>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 border rounded-lg overflow-hidden bg-muted/30">
-                      <img
-                        src={uploadedImage || form.imageUrl}
-                        alt="Profile preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-muted-foreground">Invalid Image</div>';
-                        }}
+              {/* Location Section */}
+              <div className="border-t pt-6">
+                <label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                  <MapPin size={16} />
+                  Restaurant Location
+                </label>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    name="location"
+                    value={adminForm.location}
+                    onChange={handleAdminChange}
+                    className="input-field w-full"
+                    placeholder="Enter restaurant address or location"
+                  />
+                  <button
+                    type="button"
+                    onClick={getCurrentLocation}
+                    className="flex items-center gap-2 px-4 py-2 bg-secondary/10 hover:bg-secondary/20 rounded transition-colors text-sm w-full justify-center"
+                  >
+                    <MapPin size={16} />
+                    Detect Current Location Automatically
+                  </button>
+                  {autoLocation && (
+                    <div className="text-xs bg-muted/30 p-3 rounded flex items-start gap-2">
+                      <MapPin size={12} className="mt-0.5" />
+                      <div>
+                        <p className="font-medium">Detected Location:</p>
+                        <p className="text-muted-foreground">{autoLocation}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Image Upload Section */}
+              <div className="border-t pt-6">
+                <label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                  <Image size={16} />
+                  Restaurant Logo / Profile Image
+                </label>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2">Option 1: Enter URL</p>
+                      <input
+                        type="text"
+                        name="imageUrl"
+                        value={adminForm.imageUrl}
+                        onChange={handleAdminChange}
+                        className="input-field w-full"
+                        placeholder="https://example.com/logo.png"
                       />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm">Image will be saved with your profile</p>
-                      <p className="text-xs text-muted-foreground">Max size: 5MB, Formats: JPG, PNG, WebP</p>
+
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-2">Option 2: Upload File</p>
+                      <label className="flex items-center gap-2 px-4 py-3 bg-primary/10 hover:bg-primary/20 rounded transition-colors cursor-pointer justify-center">
+                        <Upload size={16} />
+                        Choose Image File
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </label>
                     </div>
                   </div>
+
+                  {/* Image Preview */}
+                  {(adminForm.imageUrl || uploadedImage) && (
+                    <div className="mt-3">
+                      <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                      <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 border rounded-lg overflow-hidden bg-muted/30">
+                          <img
+                            src={uploadedImage || adminForm.imageUrl}
+                            alt="Profile preview"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-muted-foreground">Invalid Image</div>';
+                            }}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm">Image will be saved with your profile</p>
+                          <p className="text-xs text-muted-foreground">Max size: 5MB, Formats: JPG, PNG, WebP</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+            </>
+          )}
+
+          {/* SUPER ADMIN ONLY INFO */}
+          {role === "super-admin" && (
+            <div className="border-t pt-6">
+              <label className="text-sm font-medium mb-3 block flex items-center gap-2">
+                <User size={16} />
+                Super Admin Information
+              </label>
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-800 mb-2">Super Admin Account Features:</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Manage multiple restaurants and their admins</li>
+                    <li>• Oversee all restaurant operations</li>
+                    <li>• Access to analytics across all locations</li>
+                    <li>• Create and assign admin accounts</li>
+                  </ul>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Additional restaurant details can be added later when you create individual restaurant admin accounts.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -313,7 +434,11 @@ const Signup = () => {
 
           {/* Submit Button */}
           <Button type="submit" className="w-full mt-4 py-6 text-lg">
-            Create {role === "admin" ? "Admin" : "Super Admin"} Account
+            {role === "admin" ? (
+              <span>Create Admin Account for {adminForm.restaurantName || "Restaurant"}</span>
+            ) : (
+              <span>Create Super Admin Account</span>
+            )}
           </Button>
         </form>
 
