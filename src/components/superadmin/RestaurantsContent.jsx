@@ -10,6 +10,8 @@ const RestaurantsContent = ({
     openRestaurantModal,
     toggleRestaurantStatus,
     deleteRestaurant
+    ,
+    approveRestaurant
 }) => {
 
     // Function to safely get owner name
@@ -53,6 +55,7 @@ const RestaurantsContent = ({
                         onEdit={() => openRestaurantModal(r)}
                         onDelete={() => deleteRestaurant(r.id)}
                         onToggleStatus={() => toggleRestaurantStatus(r.id)}
+                        onApprove={() => approveRestaurant(r._id || r.id)}
                     />
                 ))}
             </div>
