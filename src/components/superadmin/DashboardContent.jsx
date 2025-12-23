@@ -46,7 +46,10 @@ const DashboardContent = ({ stats, restaurants }) => {
                                         </div>
                                         <div>
                                             <p className="font-medium">{r.name}</p>
-                                            <p className="text-sm text-gray-500">{r.owner}</p>
+                                            <p className="text-sm text-gray-500">
+                                                {/* Safely render owner - could be string or object */}
+                                                {typeof r.owner === 'object' ? r.owner?.name || 'No owner' : r.owner || 'No owner'}
+                                            </p>
                                         </div>
                                     </div>
                                     <span className={`text-xs px-2 py-1 rounded-full ${r.status === "active" ? "bg-green-100 text-green-800" :

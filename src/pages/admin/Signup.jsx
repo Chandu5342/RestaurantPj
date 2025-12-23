@@ -1,21 +1,8 @@
-import React, { useState } from "react";
+// src/pages/admin/Signup.jsx - UPDATED WITH PLANS DROPDOWN
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, MapPin, Upload, Image, Building, User } from "lucide-react";
-
-const USERS_KEY = "rb_users";
-
-const readUsers = () => {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const writeUsers = (users) => {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-};
+import { Eye, EyeOff, MapPin, Upload, Image, Building, User, Check, IndianRupee } from "lucide-react";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -27,7 +14,8 @@ const Signup = () => {
     password: "",
     restaurantName: "",
     location: "",
-    imageUrl: ""
+    imageUrl: "",
+    plan: "Starter" // Default plan
   });
   const [superAdminForm, setSuperAdminForm] = useState({
     name: "",
@@ -35,9 +23,42 @@ const Signup = () => {
     password: ""
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [uploadedImage, setUploadedImage] = useState("");
   const [autoLocation, setAutoLocation] = useState("");
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch plans from backend
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const fetchPlans = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/subscriptions/plans');
+      if (response.ok) {
+        const data = await response.json();
+        setPlans(data);
+
+        // Set default plan if available
+        if (data.length > 0 && !adminForm.plan) {
+          const defaultPlan = data.find(p => p.name === "Starter") || data[0];
+          setAdminForm(prev => ({ ...prev, plan: defaultPlan.name }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+      // Fallback plans
+      setPlans([
+        { name: "Starter", price: "₹999/month", features: ["Basic Menu", "10 Tables", "Email Support"] },
+        { name: "Pro", price: "₹2,499/month", features: ["Unlimited Menu", "50 Tables", "Priority Support", "Analytics"] },
+        { name: "Business", price: "₹4,999/month", features: ["Everything in Pro", "Multi-location", "API Access"] },
+        { name: "Enterprise", price: "₹12,999/month", features: ["Custom Solutions", "Dedicated Support", "White Label"] }
+      ]);
+    }
+  };
 
   const handleAdminChange = (e) =>
     setAdminForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -96,71 +117,104 @@ const Signup = () => {
     return true;
   };
 
-  const handleAdminSubmit = (e) => {
+  const handleAdminSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
+    setLoading(true);
 
-    if (!validateAdminForm()) return;
-
-    const users = readUsers();
-    const exists = users.some(
-      (u) => u.email.toLowerCase() === adminForm.email.toLowerCase()
-    );
-
-    if (exists) {
-      setError("Email already registered. Please login.");
+    if (!validateAdminForm()) {
+      setLoading(false);
       return;
     }
 
-    const newUser = {
-      id: Date.now().toString(),
-      name: adminForm.name,
-      email: adminForm.email.toLowerCase(),
-      password: adminForm.password,
-      role: "admin",
-      restaurantName: adminForm.restaurantName,
-      location: adminForm.location || "Not specified",
-      profileImage: uploadedImage || adminForm.imageUrl || "",
-      createdAt: new Date().toISOString()
-    };
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: adminForm.name,
+          email: adminForm.email,
+          password: adminForm.password,
+          restaurantName: adminForm.restaurantName,
+          location: adminForm.location,
+          profileImage: uploadedImage || adminForm.imageUrl,
+          plan: adminForm.plan
+        })
+      });
 
-    users.push(newUser);
-    writeUsers(users);
+      const data = await response.json();
 
-    alert(`Admin account created successfully for ${adminForm.restaurantName}!`);
-    navigate("/admin/login", { replace: true });
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      setSuccess(`Registration successful! Your account is pending approval from super admin. You will receive an email when approved.`);
+
+      // Clear form
+      setAdminForm({
+        name: "",
+        email: "",
+        password: "",
+        restaurantName: "",
+        location: "",
+        imageUrl: "",
+        plan: "Starter"
+      });
+      setUploadedImage("");
+
+      // Navigate to login after 3 seconds
+      setTimeout(() => {
+        navigate("/admin/login");
+      }, 3000);
+
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSuperAdminSubmit = (e) => {
+  const handleSuperAdminSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    if (!validateSuperAdminForm()) return;
-
-    const users = readUsers();
-    const exists = users.some(
-      (u) => u.email.toLowerCase() === superAdminForm.email.toLowerCase()
-    );
-
-    if (exists) {
-      setError("Email already registered. Please login.");
+    if (!validateSuperAdminForm()) {
+      setLoading(false);
       return;
     }
 
-    const newUser = {
-      id: Date.now().toString(),
-      name: superAdminForm.name,
-      email: superAdminForm.email.toLowerCase(),
-      password: superAdminForm.password,
-      role: "super-admin",
-      createdAt: new Date().toISOString()
-    };
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: superAdminForm.name,
+          email: superAdminForm.email,
+          password: superAdminForm.password,
+          role: 'super-admin'
+        })
+      });
 
-    users.push(newUser);
-    writeUsers(users);
+      const data = await response.json();
 
-    alert(`Super Admin account created successfully!`);
-    navigate("/admin/login", { replace: true });
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      alert(`Super Admin account created successfully!`);
+      navigate("/admin/login", { replace: true });
+
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = role === "admin" ? handleAdminSubmit : handleSuperAdminSubmit;
@@ -300,6 +354,50 @@ const Signup = () => {
                       required
                     />
                   </div>
+
+                  {/* Subscription Plan Dropdown */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block flex items-center gap-2">
+                      <IndianRupee size={16} />
+                      Subscription Plan *
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {plans.map((plan) => (
+                        <button
+                          key={plan.name}
+                          type="button"
+                          onClick={() => setAdminForm(prev => ({ ...prev, plan: plan.name }))}
+                          className={`p-3 rounded-lg border-2 text-center transition-all ${adminForm.plan === plan.name
+                            ? "bg-primary/10 border-primary text-primary shadow-sm"
+                            : "bg-background border-border hover:border-primary/30"
+                            }`}
+                        >
+                          <div className="flex flex-col items-center">
+                            <span className="font-medium">{plan.name}</span>
+                            <span className="text-sm mt-1">{plan.price}</span>
+                            {adminForm.plan === plan.name && (
+                              <Check size={16} className="mt-2 text-primary" />
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Plan Features Preview */}
+                    {plans.find(p => p.name === adminForm.plan) && (
+                      <div className="mt-3 p-3 bg-muted/30 rounded-lg">
+                        <p className="text-sm font-medium mb-2">Features included:</p>
+                        <ul className="text-xs space-y-1">
+                          {plans.find(p => p.name === adminForm.plan).features.map((feature, index) => (
+                            <li key={index} className="flex items-center gap-2">
+                              <Check size={12} className="text-green-600" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -416,6 +514,7 @@ const Signup = () => {
                     <li>• Oversee all restaurant operations</li>
                     <li>• Access to analytics across all locations</li>
                     <li>• Create and assign admin accounts</li>
+                    <li>• Approve pending restaurant registrations</li>
                   </ul>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -425,17 +524,35 @@ const Signup = () => {
             </div>
           )}
 
+          {/* Success Message */}
+          {success && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+              <p className="font-medium">Success!</p>
+              <p>{success}</p>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded text-destructive text-sm">
-              {error}
+            <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+              <p className="font-medium">Error:</p>
+              <p>{error}</p>
             </div>
           )}
 
           {/* Submit Button */}
-          <Button type="submit" className="w-full mt-4 py-6 text-lg">
-            {role === "admin" ? (
-              <span>Create Admin Account for {adminForm.restaurantName || "Restaurant"}</span>
+          <Button
+            type="submit"
+            className="w-full mt-4 py-6 text-lg"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                Processing...
+              </span>
+            ) : role === "admin" ? (
+              <span>Register Restaurant Account</span>
             ) : (
               <span>Create Super Admin Account</span>
             )}
@@ -452,8 +569,8 @@ const Signup = () => {
 
         {/* Demo Info */}
         <div className="mt-4 text-xs text-muted-foreground">
-          <p>All data is stored locally in your browser for this demo.</p>
-          <p>In production, this would connect to a secure backend database.</p>
+          <p>Admin accounts require super admin approval before login.</p>
+          <p>Super admin accounts are created immediately.</p>
         </div>
       </div>
     </div>
