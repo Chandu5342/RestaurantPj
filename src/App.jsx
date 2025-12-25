@@ -29,18 +29,13 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-
-            {/* Login/Signup */}
             <Route path="/admin/login" element={<Login />} />
             <Route path="/admin/signup" element={<Signup />} />
-
-            {/* Dashboards / Pages */}
             <Route path="/menu" element={<Menu />} />
             <Route path="/firstpage" element={<FirstPage />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order" element={<Order />} />
-
             <Route path="/super-admin" element={<SuperAdmin />} />
             <Route path="/scan" element={<Scanner />} />
             <Route path="*" element={<NotFound />} />

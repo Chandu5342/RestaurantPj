@@ -13,15 +13,6 @@ const RestaurantsContent = ({
     ,
     approveRestaurant
 }) => {
-
-    // Function to safely get owner name
-    const getOwnerName = (restaurant) => {
-        if (typeof restaurant.owner === 'object') {
-            return restaurant.owner?.name || 'No owner name';
-        }
-        return restaurant.owner || 'No owner';
-    };
-
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row gap-4 justify-between">
@@ -48,10 +39,7 @@ const RestaurantsContent = ({
                 {restaurants.map(r => (
                     <RestaurantCard
                         key={r.id}
-                        restaurant={{
-                            ...r,
-                            owner: getOwnerName(r) // Ensure owner is always a string
-                        }}
+                        restaurant={r}
                         onEdit={() => openRestaurantModal(r)}
                         onDelete={() => deleteRestaurant(r.id)}
                         onToggleStatus={() => toggleRestaurantStatus(r.id)}
